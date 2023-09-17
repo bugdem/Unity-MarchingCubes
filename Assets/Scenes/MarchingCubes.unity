@@ -302,22 +302,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b05ad79ead2ba9499cf13f93ea80d44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _mapSize: {x: 12, y: 12, z: 12}
+  _mapSize: {x: 25, y: 20, z: 25}
   _useRandomSeed: 0
   _randomSeed: 1
+  _noiseScale: 0.9
   _showSurfacePoints: 1
   _surfaceSpacing: 5
   _maxSurfaceColor: {r: 1, g: 1, b: 1, a: 1}
   _minSurfaceColor: {r: 0, g: 0, b: 0, a: 1}
-  _maxSurfaceValue: 10
-  _minSurfaceValue: 0
-  _currentSurfaceValue: 6
+  _maxSurfaceValue: 0.83
+  _minSurfaceValue: 0.16
+  _currentSurfaceValue: 0.3968928
   _surfacePointContainer: {fileID: 1153810655}
   _surfacePointPrefab: {fileID: 7238569846574633416, guid: f61b32b86043bb1478b57e130bd424e3, type: 3}
   _surfaceValueSlider: {fileID: 1944670934}
   _maxSurfaceValueText: {fileID: 692229218}
   _minSurfaceValueText: {fileID: 1170071999}
-  _moveDuration: 0.1
+  _moveDuration: 0
   _meshRenderer: {fileID: 650800773}
   _meshFilter: {fileID: 650800771}
 --- !u!4 &396773825
@@ -681,12 +682,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
+  m_fontSize: 30
   m_fontSizeBase: 36
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_fontSizeMax: 30
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -1104,12 +1105,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
+  m_fontSize: 30
   m_fontSizeBase: 36
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_fontSizeMax: 30
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512

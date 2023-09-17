@@ -27,15 +27,16 @@ public class MarchingCubes : MonoBehaviour
 	[SerializeField] private Vector3Int _mapSize = new Vector3Int(12, 12, 12);
 	[SerializeField] private bool _useRandomSeed = false;
 	[SerializeField] private int _randomSeed = 1;
+	[SerializeField] private float _noiseScale = .9f;
 
 	[Header("Surface Point")]
 	[SerializeField] private bool _showSurfacePoints = true;
 	[SerializeField] private float _surfaceSpacing = 1f;
 	[SerializeField] private Color _maxSurfaceColor = Color.white;
 	[SerializeField] private Color _minSurfaceColor = Color.black;
-	[SerializeField] private int _maxSurfaceValue = 10;
-	[SerializeField] private int _minSurfaceValue = 0;
-	[SerializeField, ReadOnly] private float _currentSurfaceValue;
+	[SerializeField] private float _maxSurfaceValue = 10;
+	[SerializeField] private float _minSurfaceValue = 0;
+	[SerializeField] private float _currentSurfaceValue;
 	[SerializeField] private Transform _surfacePointContainer;
 	[SerializeField] private GameObject _surfacePointPrefab;
 	[SerializeField] private Slider _surfaceValueSlider;
@@ -54,10 +55,16 @@ public class MarchingCubes : MonoBehaviour
 	private Vector3Int _currentMarchingCubeIndex;
 	private Coroutine _meshCreationCoroutine;
 
+	private float _minPerlinSurfaceValue;
+	private float _maxPerlinSurfaceValue;
+
 	private void Start()
 	{
 		_maxSurfaceValueText.SetText(_maxSurfaceValue.ToString());
 		_minSurfaceValueText.SetText(_minSurfaceValue.ToString());
+
+		_minPerlinSurfaceValue = float.MaxValue;
+		_maxPerlinSurfaceValue = float.MinValue;
 
 		_mesh = _meshFilter.mesh;
 		_surfaceValueSlider.value = _currentSurfaceValue / (_minSurfaceValue + _maxSurfaceValue);
@@ -101,7 +108,15 @@ public class MarchingCubes : MonoBehaviour
 			surfacePoint.Obj.gameObject.SetActive(surfacePoint.Value >= _currentSurfaceValue);
 
 			_surfacePoints.Add(index, surfacePoint);
+
+			if (surfacePoint.Value < _minPerlinSurfaceValue)
+				_minPerlinSurfaceValue = surfacePoint.Value;
+			if (surfacePoint.Value > _maxPerlinSurfaceValue)
+				_maxPerlinSurfaceValue = surfacePoint.Value;
 		});
+
+		Debug.Log("Min Surface Value : " + _minPerlinSurfaceValue.ToString("F2"));
+		Debug.Log("Max Surface Value : " + _maxPerlinSurfaceValue.ToString("F2"));
 	}
 
 	public void CreateMesh()
@@ -129,10 +144,13 @@ public class MarchingCubes : MonoBehaviour
 					Vector3Int index = new Vector3Int(indexX, indexY, indexZ);
 					MarchCube(index);
 
-					yield return new WaitForSeconds(_moveDuration);
+					if (_moveDuration > 0)
+						yield return new WaitForSeconds(_moveDuration);
 				}
 			}
 		}
+
+		yield break;
 	}
 
 	private void MarchCube(Vector3Int index)
@@ -159,6 +177,7 @@ public class MarchingCubes : MonoBehaviour
 
 		_mesh.vertices = _vertices.ToArray();
 		_mesh.triangles = _triangles.ToArray();
+		_mesh.RecalculateNormals();
 		_mesh.RecalculateBounds();
 	}
 
@@ -230,7 +249,9 @@ public class MarchingCubes : MonoBehaviour
 	// Returns random value right now.
 	private float GetSurfaceValue(Vector3Int surfaceIndex)
 	{
-		return Random.Range(_minSurfaceValue, _maxSurfaceValue);
+		// return Random.Range(_minSurfaceValue, _maxSurfaceValue);
+
+		return Perlin3D(surfaceIndex.x * _noiseScale, surfaceIndex.y * _noiseScale, surfaceIndex.z * _noiseScale);
 	}
 
 	private Color GetColorFromSurfaceValue(Vector3Int surfaceIndex)
@@ -242,6 +263,20 @@ public class MarchingCubes : MonoBehaviour
 	private Color GetColorFromSurfaceValue(float surfaceValue)
 	{
 		return Color.Lerp(_minSurfaceColor, _maxSurfaceColor, surfaceValue / (_minSurfaceValue + _maxSurfaceValue));
+	}
+
+	public static float Perlin3D(float x, float y, float z)
+	{
+		float ab = Mathf.PerlinNoise(x, y);
+		float bc = Mathf.PerlinNoise(y, z);
+		float ac = Mathf.PerlinNoise(x, z);
+
+		float ba = Mathf.PerlinNoise(y, x);
+		float cb = Mathf.PerlinNoise(z, y);
+		float ca = Mathf.PerlinNoise(z, x);
+
+		float abc = ab + bc + ac + ba + cb + ca;
+		return abc / 6f;
 	}
 
 	private void OnDrawGizmos()
